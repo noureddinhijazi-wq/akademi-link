@@ -1,0 +1,13 @@
+{
+  "name": "akademi-link",
+  "version": "1.0.0",
+  "description": "LinkedIn-style professional network for academics",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "seed": "node seed.js"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
