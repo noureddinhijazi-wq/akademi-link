@@ -357,6 +357,9 @@ async function router(req, res) {
   });
 }
 
+// Auto-seed on first run
+require('./seed');
+
 const server = http.createServer(router);
 server.listen(PORT,()=>{
   console.log(`\n🔗 AkademiLink running → http://localhost:${PORT}`);
