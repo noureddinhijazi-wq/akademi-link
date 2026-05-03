@@ -219,6 +219,8 @@ function renderShell() {
         </div>
       </div>
     </aside>
+    <button class="hamburger" id="hamburger-btn" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+    <div class="sidebar-overlay" id="sidebar-overlay" onclick="document.getElementById('sidebar').classList.remove('open');document.getElementById('sidebar-overlay').classList.remove('show')"></div>
     <main class="main-content">
       <div id="page-root"></div>
     </main>
@@ -229,7 +231,7 @@ function attachNav() {
   document.getElementById('logout-btn')?.addEventListener('click', () => { if (confirm('Sign out?')) logout(); });
   document.getElementById('theme-btn')?.addEventListener('click', toggleTheme);
   document.querySelectorAll('.nav-item[data-page]').forEach(btn => {
-    btn.addEventListener('click', () => nav(btn.dataset.page));
+    btn.addEventListener('click', () => { nav(btn.dataset.page); document.getElementById('sidebar').classList.remove('open'); });
   });
 }
 

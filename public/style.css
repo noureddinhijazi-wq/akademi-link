@@ -207,3 +207,14 @@ tbody tr:hover{background:var(--card2);}
   .page-pad{padding:16px;}
   .form-row{grid-template-columns:1fr;}
 }
+
+/* ── MOBILE NAV ── */
+.hamburger{display:none;position:fixed;top:12px;left:12px;z-index:200;background:var(--primary);color:#fff;border:none;border-radius:8px;width:40px;height:40px;font-size:18px;cursor:pointer;align-items:center;justify-content:center;box-shadow:var(--shadow-md);}
+.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:99;}
+@media(max-width:768px){
+  .hamburger{display:flex;}
+  .sidebar{transform:translateX(-240px);transition:transform .25s;}
+  .sidebar.open{transform:translateX(0);}
+  .sidebar-overlay.show{display:block;}
+  .main-content{margin-left:0;padding-top:56px;}
+}
