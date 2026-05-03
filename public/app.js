@@ -34,18 +34,18 @@ function toggleTheme() { applyTheme(S.theme === 'dark' ? 'light' : 'dark'); cons
 /* ── Auth ──────────────────────────────────────────────────── */
 function initAuth() {
   const t = localStorage.getItem('al_token'), u = localStorage.getItem('al_user');
-  if (t && u) { S.token = t; S.user = JSON.parse(u); return true; }
+  if (t && u) { S.token = t; S.user = JSON.parse(u); if(!S.user.name) S.user.name = S.user.email || 'User'; return true; }
   return false;
 }
-function saveAuth(token, user) { S.token = token; S.user = user; localStorage.setItem('al_token', token); localStorage.setItem('al_user', JSON.stringify(user)); }
+function saveAuth(token, user) { S.token = token; S.user = user; if(!S.user.name) S.user.name = S.user.email || 'User'; localStorage.setItem('al_token', token); localStorage.setItem('al_user', JSON.stringify(user)); }
 function logout() { S.token = null; S.user = null; localStorage.removeItem('al_token'); localStorage.removeItem('al_user'); render(); }
 
 /* ── Nav ───────────────────────────────────────────────────── */
 function nav(page, param = null) { S.page = page; S.pageParam = param; render(); window.scrollTo(0, 0); }
 
 /* ── Helpers ───────────────────────────────────────────────── */
-function avt(name = '?', cls = '') {
-  const i = name.split(' ').slice(0, 2).map(w => w[0]).join('').toUpperCase();
+function avt(name, cls) { name = name || '?'; cls = cls || '';
+  const i = name.split(' ').slice(0,2).map(w=>w&&w[0]?w[0]:'').join('').toUpperCase()||'?';
   const c = ['#6366f1','#0A66C2','#057642','#7B3F9E','#C37D16','#CC1016'][name.charCodeAt(0) % 6];
   return `<div class="avatar ${cls}" style="background:${c}">${i}</div>`;
 }
@@ -212,7 +212,7 @@ function renderShell() {
           ${avt(u.name, 'avatar-sm')}
           <div style="flex:1;min-width:0">
             <div class="sidebar-user-name">${u.name}</div>
-            <div class="sidebar-user-role">${u.role.charAt(0).toUpperCase()+u.role.slice(1)}</div>
+            <div class="sidebar-user-role">${(u.role||'user').charAt(0).toUpperCase()+(u.role||'user').slice(1)}</div>
           </div>
           <button class="btn-icon" id="theme-btn" title="Toggle theme">☀️</button>
           <button class="btn-icon" id="logout-btn" title="Sign out">⏏</button>
