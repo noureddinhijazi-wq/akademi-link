@@ -293,6 +293,7 @@ async function handleAdmin(method,p,req,res){
   const exportM=p==='/api/admin/export';
   const roleM=p.match(/^\/api\/admin\/users\/(\d+)\/role$/);
   const statusM=p.match(/^\/api\/admin\/users\/(\d+)\/status$/);
+  const deleteUserM=p.match(/^\/api\/admin\/users\/(\d+)$/);
 
   if(method==='GET'&&exportM){
     const u=requireAuth(req,res);if(!u)return true;if(u.role!=='admin')return forbidden(res);
@@ -309,6 +310,7 @@ async function handleAdmin(method,p,req,res){
   }
   if(method==='PATCH'&&roleM){const u=requireAuth(req,res);if(!u)return true;if(u.role!=='admin')return forbidden(res);const b=await body(req);if(!b.role)return badReq(res,'Role required');const updated=db.update('users',roleM[1],{role:b.role});if(!updated)return notFound(res);return ok(res,safeUser(updated));}
   if(method==='PATCH'&&statusM){const u=requireAuth(req,res);if(!u)return true;if(u.role!=='admin')return forbidden(res);const b=await body(req);const updated=db.update('users',statusM[1],{status:b.status});if(!updated)return notFound(res);return ok(res,safeUser(updated));}
+  if(method==='DELETE'&&deleteUserM){const u=requireAuth(req,res);if(!u)return true;if(u.role!=='admin')return forbidden(res);const uid=Number(deleteUserM[1]);if(uid===u.id)return badReq(res,'Cannot delete yourself');const target=db.findById('users',uid);if(!target)return notFound(res);db.delete('users',uid);db.findAll('projects',{ownerId:uid}).forEach(p=>db.delete('projects',p.id));db.findAll('applications',{applicantId:uid}).forEach(a=>db.delete('applications',a.id));db.findAll('advisor_requests',{studentId:uid}).forEach(r=>db.delete('advisor_requests',r.id));db.findAll('advisor_requests',{instructorId:uid}).forEach(r=>db.delete('advisor_requests',r.id));return ok(res,{success:true});}
   return null;
 }
 

@@ -300,7 +300,7 @@ function attachNav(){
     overlay.classList.toggle('show');
   });
   overlay?.addEventListener('click',()=>{sidebar.classList.remove('open');overlay.classList.remove('show');});
-  document.getElementById('logout-btn')?.addEventListener('click',()=>{if(confirm('Sign out?'))logout();});
+  document.getElementById('logout-btn')?.addEventListener('click',()=>showLogoutModal());
   document.getElementById('theme-btn')?.addEventListener('click',toggleTheme);
   document.querySelectorAll('.nav-item[data-page]').forEach(btn=>{
     btn.addEventListener('click',()=>{
@@ -507,7 +507,7 @@ async function pgProjectDetail(el,projectId){
   const isStudent=S.user.role==='student';
   const apps=isOwner?await GET(`/projects/${projectId}/applications`):[];
   el.innerHTML=`<div class="page-pad" style="max-width:900px">
-    <button class="btn btn-ghost btn-sm" onclick="history.back()" style="margin-bottom:16px">← Back</button>
+    <button class="btn btn-ghost btn-sm" onclick="safeBack()" style="margin-bottom:16px">← Back</button>
     <div class="card" style="margin-bottom:16px">
       <div class="card-body">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px">
@@ -908,12 +908,12 @@ async function pgViewProfile(el,userId){
   const isMe=userId===S.user.id;
   if(isMe){nav('profile');return;}
   el.innerHTML=`<div class="page-pad" style="max-width:700px">
-    <button class="btn btn-ghost btn-sm" onclick="history.back()" style="margin-bottom:16px">← Back</button>
+    <button class="btn btn-ghost btn-sm" onclick="safeBack()" style="margin-bottom:16px">← Back</button>
     <div class="card" style="margin-bottom:16px">
       <div style="height:80px;background:linear-gradient(135deg,#6366f1,#0A66C2);border-radius:var(--radius) var(--radius) 0 0)"></div>
       <div style="padding:0 24px 20px">
         <div style="margin-top:-32px;margin-bottom:12px">${avt(user.name,'avatar-xl')}</div>
-        <div style="font-size:20px;font-weight:800">${esc(user.academicTitle||'')} ${esc(user.name)}</div>
+        <div style="font-size:20px;font-weight:800">${esc(user.name)}</div>
         <div style="color:var(--text2);margin-top:3px">${esc(user.department||'')}${user.year?' · '+esc(user.year):''}</div>
         <div style="margin-top:6px"><span class="badge badge-${user.role==='instructor'?'purple':'blue'}">${esc(user.role)}</span></div>
         ${user.githubLink?`<div style="margin-top:8px"><a href="${esc(user.githubLink)}" target="_blank" style="font-size:13px">🔗 GitHub</a></div>`:''}
@@ -938,7 +938,7 @@ async function pgProfile(el){
       <div style="height:80px;background:linear-gradient(135deg,#6366f1,#0A66C2)"></div>
       <div style="padding:0 24px 20px">
         <div style="margin-top:-32px;margin-bottom:12px">${avt(user.name,'avatar-xl')}</div>
-        <div style="font-size:20px;font-weight:800">${esc(user.academicTitle||'')} ${esc(user.name)}</div>
+        <div style="font-size:20px;font-weight:800">${esc(user.name)}</div>
         <div style="color:var(--text2)">${esc(user.department||'')}${user.year?' · '+esc(user.year):''}</div>
         <span class="badge badge-${user.role==='instructor'?'purple':'blue'}" style="margin-top:6px">${esc(user.role)}</span>
       </div>
@@ -999,7 +999,7 @@ async function pgAdminUsers(el){
         <td><span class="badge badge-${u.status==='active'?'green':'red'}">${u.status||'active'}</span></td>
         <td><div style="display:flex;gap:6px">
           ${u.role!=='admin'?`<button class="btn btn-secondary btn-sm change-role" data-id="${u.id}" data-role="${u.role}">Role</button>`:''}
-          ${u.role!=='admin'?`<button class="btn btn-${u.status==='active'?'danger':'success'} btn-sm toggle-status" data-id="${u.id}" data-status="${u.status||'active'}">${u.status==='active'?'Deactivate':'Activate'}</button>`:''}
+          ${u.role!=='admin'?`<button class="btn btn-${u.status==='active'?'danger':'success'} btn-sm toggle-status" data-id="${u.id}" data-status="${u.status||'active'}">${u.status==='active'?'Deactivate':'Activate'}</button>`:''}  ${u.role!=='admin'?`<button class="btn btn-danger btn-sm delete-user" data-id="${u.id}" data-name="${esc(u.name)}">🗑 Delete</button>`:''}
         </div></td>
       </tr>`).join('')}</tbody>
     </table></div></div>
@@ -1013,6 +1013,24 @@ async function pgAdminUsers(el){
       <div class="modal-foot"><button class="btn btn-ghost" data-close>Cancel</button><button class="btn btn-primary" id="save-role">Save</button></div>`);
       document.getElementById('save-role').addEventListener('click',async()=>{
         try{await PATCH(`/admin/users/${btn.dataset.id}/role`,{role:document.getElementById('new-role').value});closeModal();toast('Role updated!','success');renderPage();}catch(e){toast(e.message,'error');}
+      });
+    });
+  });
+  el.querySelectorAll('.delete-user').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      modal(`<div class="modal-head" style="border:none;padding-bottom:0"><button class="modal-close" data-close>✕</button></div>
+      <div class="modal-body" style="text-align:center;padding:20px 32px 10px">
+        <div style="font-size:48px;margin-bottom:14px">⚠️</div>
+        <h2 style="font-size:18px;font-weight:800;margin-bottom:8px">Delete Account?</h2>
+        <p style="color:var(--text2);font-size:14px;line-height:1.6">You are about to permanently delete <strong>${esc(btn.dataset.name)}</strong>.<br/>This will also remove all their projects and applications.<br/><span style="color:var(--danger);font-weight:600">This action cannot be undone.</span></p>
+      </div>
+      <div class="modal-foot" style="justify-content:center;gap:12px;padding-bottom:24px">
+        <button class="btn btn-ghost" style="min-width:120px" data-close>Cancel</button>
+        <button class="btn btn-danger" style="min-width:120px" id="confirm-delete-user">Delete Account</button>
+      </div>`);
+      document.getElementById('confirm-delete-user').addEventListener('click',async()=>{
+        try{await DEL(`/admin/users/${btn.dataset.id}`);closeModal();toast('Account deleted','success');renderPage();}
+        catch(e){toast(e.message,'error');}
       });
     });
   });
@@ -1097,5 +1115,19 @@ async function exportData(){
 }
 
 /* ── INIT ───────────────────────────────────────────────────── */
+function showLogoutModal(){
+  modal(`<div class="modal-head" style="border:none;padding-bottom:0"><button class="modal-close" data-close>✕</button></div>
+  <div class="modal-body" style="text-align:center;padding:24px 32px 10px">
+    <div style="font-size:52px;margin-bottom:16px">👋</div>
+    <h2 style="font-size:20px;font-weight:800;margin-bottom:8px">Sign Out?</h2>
+    <p style="color:var(--text2);font-size:14px">You will be returned to the login page.</p>
+  </div>
+  <div class="modal-foot" style="justify-content:center;gap:12px;padding-bottom:24px">
+    <button class="btn btn-ghost" style="min-width:120px" data-close>Cancel</button>
+    <button class="btn btn-danger" style="min-width:120px" id="confirm-logout">Sign Out</button>
+  </div>`);
+  document.getElementById('confirm-logout').addEventListener('click',()=>{closeModal();logout();});
+}
+function safeBack(){if(document.referrer.includes(window.location.hostname)||window.history.length>2){history.back();}else{nav("dashboard");}}
 applyTheme(localStorage.getItem('theme')||'dark');
 if(initAuth())render();else render();
