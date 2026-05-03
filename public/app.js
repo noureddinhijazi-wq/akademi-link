@@ -106,9 +106,9 @@ function renderAuth(tab='login',err=''){
   return `<div class="auth-page">
     <div class="auth-wrap">
       <div class="auth-logo">
-        <div class="auth-logo-icon">🎓</div>
+        <img src="/icon.png" alt="Saving Private Öğrenci"/>
         <h1>Saving Private Öğrenci</h1>
-        <p>Project Matching & Team Formation · Uskudar University</p>
+        <p>— Tek bir öğrenciyi bile geride bırakmayız —</p>
       </div>
       ${tab==='login'?`
       <div class="role-tabs">
@@ -263,8 +263,9 @@ function renderShell(){
     <div class="sidebar-overlay" id="sidebar-overlay"></div>
     <aside class="sidebar" id="sidebar">
       <div class="sidebar-brand">
-        <div class="sidebar-logo">🎓</div>
-        <div><div class="sidebar-title">Saving Private Öğrenci</div><div class="sidebar-sub">Uskudar University</div></div>
+        <img src="/icon.png" alt="SPÖ" style="width:70px;height:auto"/>
+        <div class="sidebar-title" style="margin-top:8px">Saving Private Öğrenci</div>
+        <div class="sidebar-sub">Uskudar University</div>
       </div>
       <nav class="sidebar-nav">
         ${navItems.map(n=>`
