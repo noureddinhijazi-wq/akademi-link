@@ -61,7 +61,8 @@ function timeAgo(d){
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function typeBadge(type){
   const map={'Course Project':'badge-blue','TÜBİTAK Student Project':'badge-green','Teknofest Student Project':'badge-orange'};
-  return `<span class="badge ${map[type]||'badge-gray'}">${esc(type||'Unknown')}</span>`;
+  const cls=map[type]||'badge-purple';
+  return `<span class="badge ${cls}">${esc(type||'Unknown')}</span>`;
 }
 function statusBadge(status){
   if(status==='full')return `<span class="badge badge-red">● Full</span>`;
@@ -609,16 +610,14 @@ window.deleteProject=async function(id){
 
 /* ── BROWSE PROJECTS ────────────────────────────────────────── */
 async function pgProjectsBrowse(el){
-  const projects=await GET('/projects');
+  const [projects, allCats]=await Promise.all([GET('/projects'),GET('/categories')]);
   el.innerHTML=`<div class="page-pad">
     <div class="page-header"><div><h1>🔍 Browse Projects</h1><p>${projects.length} projects available</p></div></div>
     <div class="search-bar">
       <div class="search-input-wrap"><span class="search-icon">🔍</span><input id="proj-q" placeholder="Search title, skills, owner..."/></div>
       <select id="proj-type" class="filter-select">
         <option value="">All Types</option>
-        <option value="Course Project">Course Project</option>
-        <option value="TÜBİTAK Student Project">TÜBİTAK Student Project</option>
-        <option value="Teknofest Student Project">Teknofest Student Project</option>
+        ${allCats.map(ct=>`<option value="${esc(ct.name)}">${esc(ct.name)}</option>`).join('')}
       </select>
       <select id="proj-status" class="filter-select">
         <option value="">All Status</option>
@@ -718,15 +717,13 @@ async function pgProjectsMine(el){
   attachProjectListeners(el);
 }
 
-async function openCreateProject(){
+async function openCreateProject(){  const cats=await GET('/categories');
   modal(`<div class="modal-head"><h2>Create New Project</h2><button class="modal-close" data-close>✕</button></div>
   <div class="modal-body">
     <div class="form-group"><label>Project Title *</label><input id="pt" placeholder="e.g. AI Campus Navigation System"/></div>
     <div class="form-group"><label>Project Type *</label>
       <select id="ptype"><option value="">-- Select Type --</option>
-        <option value="Course Project">Course Project</option>
-        <option value="TÜBİTAK Student Project">TÜBİTAK Student Project</option>
-        <option value="Teknofest Student Project">Teknofest Student Project</option>
+        ${cats.map(ct=>`<option value="${esc(ct.name)}">${esc(ct.name)}</option>`).join('')}
       </select>
     </div>
     <div class="form-group"><label>Description *</label><textarea id="pd" rows="3" placeholder="Describe your project goals and what you're building..."></textarea></div>
