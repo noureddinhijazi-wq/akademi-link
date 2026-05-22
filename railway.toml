@@ -1,0 +1,6 @@
+[deploy]
+startCommand = "node server.js"
+
+[[volumes]]
+mountPath = "/data"
+name = "spo-data"

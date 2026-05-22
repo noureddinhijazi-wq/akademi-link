@@ -2,6 +2,20 @@ const db = require('./db');
 const { hashPassword } = require('./auth');
 
 function seed() {
+  // Always ensure default categories exist (in case they were deleted or never seeded)
+  const existingCats = db.findAll('categories').map(c => c.name);
+  const defaultCats = [
+    { name: 'Course Project', description: 'University course-based projects for academic credit.' },
+    { name: 'TÜBİTAK Student Project', description: 'Scientific research projects funded by TÜBİTAK (2209-A/B programs).' },
+    { name: 'Teknofest Student Project', description: 'Technology competition projects for Teknofest festival.' },
+  ];
+  defaultCats.forEach(cat => {
+    if (!existingCats.includes(cat.name)) {
+      db.insert('categories', cat);
+      console.log('Added missing category:', cat.name);
+    }
+  });
+
   if (db.findAll('users').length > 0) { console.log('Already seeded.'); return; }
   console.log('Seeding...');
 

@@ -1,7 +1,10 @@
 const fs = require('fs');
 const path = require('path');
 
-const DATA_DIR = path.join(__dirname, 'data');
+// Use Railway's persistent volume if available, otherwise local data folder
+const DATA_DIR = process.env.RAILWAY_ENVIRONMENT
+  ? '/data'
+  : path.join(__dirname, 'data');
 
 function ensureDir() {
   if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
@@ -28,18 +31,14 @@ function nextId(collection) {
 }
 
 const db = {
-  // Generic CRUD
   findAll: (col, filter = {}) => {
     let items = read(col);
     Object.keys(filter).forEach(k => {
-      items = items.filter(i => i[k] == filter[k]);
+      items = items.filter(i => String(i[k]) === String(filter[k]));
     });
     return items;
   },
-  findOne: (col, filter = {}) => {
-    const items = db.findAll(col, filter);
-    return items[0] || null;
-  },
+  findOne: (col, filter = {}) => db.findAll(col, filter)[0] || null,
   findById: (col, id) => db.findOne(col, { id: Number(id) }),
   insert: (col, data) => {
     const items = read(col);
